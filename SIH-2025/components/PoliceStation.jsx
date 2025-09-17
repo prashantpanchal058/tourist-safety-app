@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaArrowLeft, FaPhoneAlt, FaMapMarkerAlt } from "react-icons/fa";
+import { FaArrowLeft, FaMapMarkerAlt } from "react-icons/fa";
 
 const PoliceStation = () => {
   const [stations, setStations] = useState([]);
+  const [userLocation, setUserLocation] = useState(null);
   const navigate = useNavigate();
 
   function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
@@ -14,9 +15,9 @@ const PoliceStation = () => {
     const a =
       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
       Math.cos(deg2rad(lat1)) *
-      Math.cos(deg2rad(lat2)) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
+        Math.cos(deg2rad(lat2)) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
 
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c; // Distance in km
@@ -26,7 +27,6 @@ const PoliceStation = () => {
     return deg * (Math.PI / 180);
   }
 
-
   // Fetch nearby police stations
   async function fetchPoliceStations() {
     if (navigator.geolocation) {
@@ -34,6 +34,7 @@ const PoliceStation = () => {
         async (pos) => {
           const lat = pos.coords.latitude;
           const lon = pos.coords.longitude;
+          setUserLocation({ lat, lon });
 
           try {
             const response = await fetch(
@@ -46,6 +47,7 @@ const PoliceStation = () => {
             );
 
             const data = await response.json();
+            console.log(data);
 
             const elements = Array.isArray(data.policeStations)
               ? data.policeStations
@@ -55,9 +57,12 @@ const PoliceStation = () => {
               name: station.name || "Unknown",
               lat: station.location?.lat,
               lon: station.location?.lon,
-              distance: getDistanceFromLatLonInKm(lat, lon, station.location?.lat, station.location?.lon).toFixed(2),
-              phone: "+91100",
-              mapsUrl: `https://www.google.com/maps?q=${station.location?.lat},${station.location?.lon}`,
+              distance: getDistanceFromLatLonInKm(
+                lat,
+                lon,
+                station.location?.lat,
+                station.location?.lon
+              ).toFixed(2),
             }));
 
             setStations(mappedStations);
@@ -125,36 +130,31 @@ const PoliceStation = () => {
                 <h2 className="font-bold text-lg text-gray-800">
                   {station.name}
                 </h2>
-                <p className="text-sm text-gray-600">
-                  Lat: {station.lat}, Lon: {station.lon}
-                </p>
                 <p className="text-xs text-gray-500">{station.distance} km</p>
               </div>
               <div className="flex gap-2">
-                <a
-                  href={`tel:${station.phone}`}
-                  className="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-lg flex items-center gap-1"
-                >
-                  <FaPhoneAlt /> Call
-                </a>
-                <a
-                  href={station.mapsUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <button
+                  onClick={() =>
+                    navigate("/hospital-map", {
+                      state: {
+                        hospital: {
+                          name: station.name,
+                          location: { lat: station.lat, lon: station.lon },
+                          address: station.name,
+                        },
+                        userLocation: userLocation,
+                      },
+                    })
+                  }
                   className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-lg flex items-center gap-1"
                 >
                   <FaMapMarkerAlt /> Directions
-                </a>
+                </button>
               </div>
             </div>
           ))
         )}
       </div>
-
-      {/* Floating Emergency Button */}
-      {/* <button className="fixed bottom-6 right-6 bg-red-600 hover:bg-red-700 text-white p-4 rounded-full shadow-lg">
-        🚨
-      </button> */}
     </div>
   );
 };

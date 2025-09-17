@@ -28,8 +28,8 @@ const HospitalMap = () => {
             Math.sin(dLat / 2) * Math.sin(dLat / 2) +
             Math.cos((lat1 * Math.PI) / 180) *
             Math.cos((lat2 * Math.PI) / 180) *
-            Math.sin(dLon / 2) *
-            Math.sin(dLon / 2);
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         return (R * c).toFixed(2); // km
     };
@@ -50,11 +50,45 @@ const HospitalMap = () => {
 
         map.fitBounds(routeLineRef.current.getBounds());
 
-        // Calculate distance + time (assume avg 40 km/h driving)
-        const dist = getDistanceFromLatLonInKm(start.lat, start.lon, end.lat, end.lon);
+        // Calculate distance
+        const dist = getDistanceFromLatLonInKm(
+            start.lat,
+            start.lon,
+            end.lat,
+            end.lon
+        );
         setDistanceKm(dist);
-
     };
+
+    // Update liveLoc every 3 minutes
+    const updateLiveLoc = async () => {
+        if (!userLocation) return;
+
+        const token = localStorage.getItem("token");
+        if (!token) return;
+
+        const payload = {
+            liveLoc: {
+                lan: String(userLocation.lat),
+                lon: String(userLocation.lon),
+            },
+        };
+
+        try {
+            await fetch("http://localhost:8007/book/updatelive/", {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    "auth-token": token,
+                },
+                body: JSON.stringify(payload),
+            });
+            console.log("Live location updated:", payload.liveLoc);
+        } catch (err) {
+            console.error("Error updating live location:", err);
+        }
+    };
+
 
     useEffect(() => {
         if (!hospital) return;
@@ -79,7 +113,9 @@ const HospitalMap = () => {
             hospital.location.lon,
         ])
             .addTo(mapRef.current)
-            .bindPopup(`<b>${hospital.name}</b><br/>${hospital.address || ""}`)
+            .bindPopup(
+                `<b>${hospital.name}</b><br/>${hospital.address || ""}`
+            )
             .openPopup();
 
         const map = mapRef.current;
@@ -115,8 +151,13 @@ const HospitalMap = () => {
                 { enableHighAccuracy: true, maximumAge: 0, timeout: 5000 }
             );
 
+            // const interval = setInterval(() => {
+            //     updateLiveLoc();
+            // }, 180000); // 3 minutes
+
             return () => {
                 navigator.geolocation.clearWatch(watcher);
+                // clearInterval(interval); // stop interval on unmount
                 if (mapRef.current) {
                     mapRef.current.remove();
                     mapRef.current = null;
@@ -145,6 +186,10 @@ const HospitalMap = () => {
                 lan: String(userLocation.lat),
                 lon: String(userLocation.lon),
             },
+            liveLoc: {
+                lan: String(userLocation.lat),
+                lon: String(userLocation.lon),
+            },
             destination: {
                 lan: String(hospital.location.lat),
                 lon: String(hospital.location.lon),
@@ -156,7 +201,7 @@ const HospitalMap = () => {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    "auth-token": token
+                    "auth-token": token,
                 },
                 body: JSON.stringify(payload),
             });
@@ -173,19 +218,17 @@ const HospitalMap = () => {
         }
     };
 
-
     const bookplans = async () => {
         const token = localStorage.getItem("token");
         if (!token) {
             alert("You must be logged in to book a plan.");
-            navigate("/")
+            navigate("/");
             return;
         }
 
         if (!window.confirm("You want to book the plan ?")) return;
 
         await booked();
-        navigate("/dashboard");
 
         if (
             hospital.location.lat &&
@@ -200,8 +243,6 @@ const HospitalMap = () => {
         }
     };
 
-
-
     return (
         <div className="flex flex-col min-h-screen">
             {/* Header */}
@@ -213,7 +254,8 @@ const HospitalMap = () => {
                     <MdArrowBack className="text-2xl text-gray-800" />
                 </button>
                 <h1 className="text-xl sm:text-2xl font-extrabold text-gray-800 flex items-center gap-2">
-                    <MdLocalHospital className="text-red-600" /> {hospital?.name}
+                    <MdLocalHospital className="text-red-600" />{" "}
+                    {hospital?.name}
                 </h1>
             </header>
 
@@ -223,11 +265,22 @@ const HospitalMap = () => {
                     <h2 className="font-bold text-lg sm:text-xl">Route Info</h2>
                     {userLocation ? (
                         <>
-                            <p><strong>Hospital:</strong> {hospital.name}</p>
-                            <p><strong>Address:</strong> {hospital.address || "N/A"}</p>
-                            <p><strong>From:</strong> Your Location</p>
-                            <p><strong>To:</strong> {hospital.name}</p>
-                            <p><strong>Distance:</strong> {distanceKm} km</p>
+                            <p>
+                                <strong>Hospital:</strong> {hospital.name}
+                            </p>
+                            <p>
+                                <strong>Address:</strong>{" "}
+                                {hospital.address || "N/A"}
+                            </p>
+                            <p>
+                                <strong>From:</strong> Your Location
+                            </p>
+                            <p>
+                                <strong>To:</strong> {hospital.name}
+                            </p>
+                            <p>
+                                <strong>Distance:</strong> {distanceKm} km
+                            </p>
 
                             <div className="flex flex-col sm:flex-row gap-2 mt-2">
                                 <button
@@ -250,16 +303,13 @@ const HospitalMap = () => {
                 </div>
 
                 {/* Map */}
-                {/* Map */}
                 <div
                     id="map"
                     className="flex-1 h-[50vh] sm:h-screen"
                 ></div>
-
             </div>
         </div>
     );
-
 };
 
 export default HospitalMap;

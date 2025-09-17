@@ -12,6 +12,7 @@ import NearbyHotels from "../components/NearbyHotels.jsx";
 import NearbyHospitals from "../components/NearbyHospitals.jsx"
 import AuthLogin from "../components/AuthLogin.jsx";
 import HospitalMap from "../components/HospitalMap.jsx";
+import PlanList from "../components/PlanList.jsx";
 // import Alert from '../components/Alert.jsx';
 
 const App = () => {
@@ -46,6 +47,7 @@ const App = () => {
         <Route path="/hospitals" element={<NearbyHospitals />} />
         <Route path="/authlogin" element={<AuthLogin />} />
         <Route path="/hospital-map" element={<HospitalMap />} />
+        <Route path="/planlist" element={<PlanList />} />
       </Routes>
 
     </>

@@ -18,7 +18,7 @@ const AuthorityDashboard = () => {
 
   const [livetourist, settourist] = useState([]);
   const [liveto, setlive] = useState({ tourists: 0 });
-  
+
   const [activeIntent, setActiveIntent] = useState("reports"); // reports | emergencies | tourists
 
   // Fetch reports from backend
@@ -62,12 +62,6 @@ const AuthorityDashboard = () => {
     { id: 2, name: "Jane Smith", type: "Accident", time: "2025-09-15 11:00 AM" },
   ];
 
-  const dummyTourists = [
-    { id: 1, name: "Alex Carter", country: "USA", activeSince: "2025-09-14" },
-    { id: 2, name: "Priya Mehta", country: "India", activeSince: "2025-09-13" },
-    { id: 3, name: "Liu Wei", country: "China", activeSince: "2025-09-12" },
-  ];
-
   useEffect(() => {
     fetchReports();
     fetchTourists();
@@ -102,9 +96,8 @@ const AuthorityDashboard = () => {
         {/* Tourists */}
         <div
           onClick={() => setActiveIntent("tourists")}
-          className={`cursor-pointer bg-white rounded-xl shadow p-5 flex items-center gap-4 ${
-            activeIntent === "tourists" ? "ring-2 ring-green-500" : ""
-          }`}
+          className={`cursor-pointer bg-white rounded-xl shadow p-5 flex items-center gap-4 ${activeIntent === "tourists" ? "ring-2 ring-green-500" : ""
+            }`}
         >
           <FaUsers className="text-green-500 text-3xl" />
           <div>
@@ -116,9 +109,8 @@ const AuthorityDashboard = () => {
         {/* Emergencies */}
         <div
           onClick={() => setActiveIntent("emergencies")}
-          className={`cursor-pointer bg-white rounded-xl shadow p-5 flex items-center gap-4 ${
-            activeIntent === "emergencies" ? "ring-2 ring-red-500" : ""
-          }`}
+          className={`cursor-pointer bg-white rounded-xl shadow p-5 flex items-center gap-4 ${activeIntent === "emergencies" ? "ring-2 ring-red-500" : ""
+            }`}
         >
           <FaExclamationTriangle className="text-red-500 text-3xl" />
           <div>
@@ -130,9 +122,8 @@ const AuthorityDashboard = () => {
         {/* Reports */}
         <div
           onClick={() => setActiveIntent("reports")}
-          className={`cursor-pointer bg-white rounded-xl shadow p-5 flex items-center gap-4 ${
-            activeIntent === "reports" ? "ring-2 ring-blue-500" : ""
-          }`}
+          className={`cursor-pointer bg-white rounded-xl shadow p-5 flex items-center gap-4 ${activeIntent === "reports" ? "ring-2 ring-blue-500" : ""
+            }`}
         >
           <FaFilePdf className="text-blue-500 text-3xl" />
           <div>
@@ -226,22 +217,29 @@ const AuthorityDashboard = () => {
               <thead>
                 <tr className="bg-gray-100 text-gray-600">
                   <th className="p-3">Name</th>
-                  <th className="p-3">Phone</th>
+                  <td className="p-3">Last location</td>
                   <th className="p-3">destination</th>
                   <th className="p-3">destination name</th>
-                  <th className="p-3">live</th>
+                  <td className="p-3">Live</td>
                   <th className="p-3">Time</th>
                 </tr>
               </thead>
               <tbody>
-                {dummyTourists.map((t) => (
-                  <tr key={t.id} className="border-b">
-                    <td className="p-3">{t.name}</td>
-                    <td className="p-3">{t.country}</td>
-                    <td className="p-3">{t.activeSince}</td>
-                    <td className="p-3">{t.name}</td>
-                    <td className="p-3">{t.country}</td>
-                    <td className="p-3">{t.activeSince}</td>
+                {livetourist.map((plans) => (
+                  <tr key={plans.id} className="border-b">
+                    <td className="p-3">{plans.userId?.name}</td>
+                    <td className="p-3">{plans.liveLoc.lan},{plans.liveLoc.lon}</td>
+                    <td className="p-3">{plans.destName}</td>
+                    <td className="p-3">{plans.address}</td>
+                    <td className="p-3">
+                      <a href={`https://www.google.com/maps/dir/?api=1&origin=${plans.userLoc.lan},${plans.userLoc.lon}&destination=${plans.destination.lan},${plans.destination.lon}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1 text-green-600 hover:underline">
+                        <FaMapMarkerAlt /> View Map
+                      </a>
+                    </td>
+                    <td className="p-3">{new Date(plans.date).toLocaleString()}</td>
                   </tr>
                 ))}
               </tbody>

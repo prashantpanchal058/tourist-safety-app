@@ -22,6 +22,16 @@ const BookPlanSchema = new Schema({
             required: true
         }
     },
+    liveLoc: {
+        lan: {
+            type: String,
+            required: true
+        },
+        lon: {
+            type: String,
+            required: true
+        }
+    },
     destination: {
         lan: {
             type: String,

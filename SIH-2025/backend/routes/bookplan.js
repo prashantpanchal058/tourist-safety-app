@@ -6,7 +6,7 @@ const BookPlan = require("../models/Bookplan");
 // Create a new BookPlan (only one per user)
 router.post("/bookplan", fetchuser, async (req, res) => {
     try {
-        const { destName, address, userLoc, destination } = req.body;
+        const { destName, address,liveLoc, userLoc, destination } = req.body;
 
         const existingPlan = await BookPlan.findOne({ userId: req.user.id });
         if (existingPlan) {
@@ -20,6 +20,7 @@ router.post("/bookplan", fetchuser, async (req, res) => {
             destName,
             address,
             userLoc,
+            liveLoc,
             destination,
             userId: req.user.id
         });
@@ -35,7 +36,7 @@ router.post("/bookplan", fetchuser, async (req, res) => {
 // Get all BookPlans for logged-in user
 router.get("/bookplan", fetchuser, async (req, res) => {
     try {
-        const plans = await BookPlan.find({ userId: req.user.id }).sort({ createdAt: -1 });
+        const plans = await BookPlan.find({ userId: req.user.id }).populate("userId").sort({ createdAt: -1 });
         res.json(plans);
     } catch (err) {
         console.error(err.message);
@@ -57,6 +58,31 @@ router.get("/bookplan/all", async (req, res) => {
         res.status(500).send("Internal Server Error");
     }
 });
+
+router.patch("/bookplan/:id/live", fetchuser, async (req, res) => {
+    try {
+        const { liveLoc } = req.body;
+
+        const plan = await BookPlan.findById(req.params.id);
+        if (!plan) {
+            return res.status(404).json({ success: false, message: "Booking not found" });
+        }
+
+        // Ensure only owner can update
+        if (plan.userId.toString() !== req.user.id) {
+            return res.status(403).json({ success: false, message: "Not allowed to update this booking" });
+        }
+
+        plan.liveLoc = liveLoc;
+        await plan.save();
+
+        res.json({ success: true, message: "Live location updated", plan });
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send("Internal Server Error");
+    }
+});
+
 
 // Delete a BookPlan
 router.delete("/bookplan/:id", fetchuser, async (req, res) => {

@@ -89,7 +89,7 @@ router.post("/nearby-hotels", async (req, res) => {
         // Overpass query: find hotels within 3000 meters
         const query = `
       [out:json];
-      node["tourism"="hotel"](around:30000,${lat},${lon});
+      node["tourism"="hotel"](around:300000,${lat},${lon});
       out;
     `;
 

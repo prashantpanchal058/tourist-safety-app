@@ -9,8 +9,6 @@ const WeatherPage = () => {
 
   const apiKey = import.meta.env.VITE_WEATHER_API_KEY;
 
-  // apiKey = VITE_GEMINI_API_KEY="AIzaSyCRftMi1ZLbDEupkTGY8IFsYl80Nh675sc"
-
   // ✅ Fetch weather by coordinates (for current location)
   const fetchWeatherByCoords = async (lat, lon) => {
     try {

@@ -74,9 +74,10 @@ const Dashboard = () => {
 
         {/* Other Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-          <div className="bg-white p-6 rounded-xl shadow hover:shadow-lg flex items-center space-x-4">
+          
+          <div onClick={() => navigate("/Police")} className="bg-white p-6 rounded-xl shadow hover:shadow-lg flex items-center space-x-4">
             <MdLocationOn className="text-3xl text-teal-600" />
-            <div onClick={() => navigate("/Police")}>
+            <div>
               <h3 className="font-bold text-lg">Nearby Police</h3>
               <p className="text-gray-600">Check nearest police stations</p>
             </div>
@@ -118,9 +119,8 @@ const Dashboard = () => {
 
         {/* Services & Booked Plans */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="bg-white p-6 rounded-xl shadow hover:shadow-lg">
+          <div onClick={() => navigate("/planlist")} className="bg-white p-6 rounded-xl shadow hover:shadow-lg">
             <h3 className="font-bold text-lg mb-4">Booked Plan</h3>
-            <p className="text-gray-600">You haven’t booked any plans yet.</p>
           </div>
           <div className="bg-white p-6 rounded-xl shadow hover:shadow-lg">
             <h3 className="font-bold text-lg mb-4">Services</h3>
